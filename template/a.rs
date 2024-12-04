@@ -1,21 +1,6 @@
-use std::fs::File;
-use std::io::{self, BufRead};
+use super::parser;
 
-fn parse() -> () {
-    let file = File::open("src/p00/in.txt").unwrap();
-    let reader = io::BufReader::new(file);
-
-    for line in reader.lines() {
-        todo!();
-    }
-    todo!();
-}
-
-fn solve() {
-    todo!()
-}
-
-pub fn run() {
+pub fn solve() {
     let () = parse();
-    solve();
+    todo!()
 }
