@@ -21,7 +21,7 @@ pub fn solve() {
     let re2 = Regex::new(r"don't\(\)").unwrap();
     let re3 = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
 
-    // collect and sort all occurences of instructions
+    // collect and sort all occurences of instructions in order of position in the text.
     let do_matches: Vec<Match> = re1
         .find_iter(&text)
         .map(|m| Match {
