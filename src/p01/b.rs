@@ -1,7 +1,8 @@
 use super::parser;
 
 pub fn solve() {
-    let (v1, v2) = parser::parse();
+    let (v1, v2) = parser::parse_file();
+
     let mut total = 0;
     for &a in v1.iter() {
         let mut count = 0;

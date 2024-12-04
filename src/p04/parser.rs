@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 
-pub fn parse() -> Vec<Vec<char>> {
+pub fn parse_file() -> Vec<Vec<char>> {
     let file = File::open("src/p04/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 

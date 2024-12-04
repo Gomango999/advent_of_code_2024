@@ -1,7 +1,8 @@
 use super::parser;
 
 pub fn solve() {
-    let (mut v1, mut v2) = parser::parse();
+    let (mut v1, mut v2) = parser::parse_file();
+
     v1.sort();
     v2.sort();
     let diff = v1

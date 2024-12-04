@@ -1,7 +1,8 @@
 use super::parser;
 
 pub fn solve() {
-    let grid = parser::parse();
+    let grid = parser::parse_file();
+
     let n = grid.len() as i32;
     let m = grid[0].len() as i32;
     let dx: Vec<i32> = vec![1, 1, 1, 0, -1, -1, -1, 0];

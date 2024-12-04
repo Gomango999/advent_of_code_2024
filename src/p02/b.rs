@@ -22,7 +22,8 @@ fn is_safe(report: &Vec<i32>) -> bool {
 }
 
 pub fn solve() {
-    let reports = parser::parse();
+    let reports = parser::parse_file();
+
     let mut count = 0;
     for report in reports {
         let mut safe = false;

@@ -1,7 +1,8 @@
 use super::parser;
 
 pub fn solve() {
-    let reports = parser::parse();
+    let reports = parser::parse_file();
+
     let mut count = 0;
     for report in reports {
         let increasing = report.last().unwrap() > report.first().unwrap();

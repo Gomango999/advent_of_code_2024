@@ -15,7 +15,8 @@ struct Match {
 }
 
 pub fn solve() {
-    let text = parser::parse();
+    let text = parser::parse_file();
+
     let re1 = Regex::new(r"do\(\)").unwrap();
     let re2 = Regex::new(r"don't\(\)").unwrap();
     let re3 = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
