@@ -1,5 +1,6 @@
 mod p01;
 mod p02;
+mod p03;
 
 use aoc_2024::Config;
 
@@ -13,6 +14,8 @@ fn main() {
         Config { day: 1, part: 'b' } => p01::b::run(),
         Config { day: 2, part: 'a' } => p02::a::run(),
         Config { day: 2, part: 'b' } => p02::b::run(),
+        Config { day: 3, part: 'a' } => p03::a::run(),
+        Config { day: 3, part: 'b' } => p03::b::run(),
         _ => (),
     }
 }

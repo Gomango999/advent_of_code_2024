@@ -16,6 +16,6 @@ fn solve() {
 }
 
 pub fn run() {
-    let reports = parse();
-    solve(reports);
+    let () = parse();
+    solve();
 }
