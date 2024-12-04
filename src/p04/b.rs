@@ -1,19 +1,7 @@
-use std::fs::File;
-use std::io::{self, BufRead};
+use super::parser;
 
-fn parse() -> Vec<Vec<char>> {
-    let file = File::open("src/p04/in.txt").unwrap();
-    let reader = io::BufReader::new(file);
-
-    let mut grid = vec![];
-    for line in reader.lines() {
-        let row = line.unwrap().chars().collect();
-        grid.push(row)
-    }
-    grid
-}
-
-fn solve(grid: Vec<Vec<char>>) {
+pub fn solve() {
+    let grid = parser::parse();
     let n = grid.len() as i32;
     let m = grid[0].len() as i32;
     let dx: Vec<i32> = vec![-1, -1, 1, 1];
@@ -37,8 +25,8 @@ fn solve(grid: Vec<Vec<char>>) {
                 }
             }
             // `alt_match` is used to remove the following case as a match.
-            // Specifically, we can't be an X-MAS if the top left and bottom right
-            // corners match.
+            // Specifically, we can't be an "X-MAS" if the top-left and bottom-
+            // right corners match.
             // M.S
             // .A.
             // S.M
@@ -50,9 +38,4 @@ fn solve(grid: Vec<Vec<char>>) {
         }
     }
     println!("{count}");
-}
-
-pub fn run() {
-    let grid = parse();
-    solve(grid);
 }

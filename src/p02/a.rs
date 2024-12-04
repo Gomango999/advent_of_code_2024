@@ -1,23 +1,7 @@
-use std::fs::File;
-use std::io::{self, BufRead};
+use super::parser;
 
-fn parse() -> Vec<Vec<i32>> {
-    let file = File::open("src/p02/in.txt").unwrap();
-    let reader = io::BufReader::new(file);
-
-    let mut reports = vec![];
-    for line in reader.lines() {
-        let levels: Vec<i32> = line
-            .unwrap()
-            .split_whitespace()
-            .map(|s| s.parse::<i32>().unwrap())
-            .collect();
-        reports.push(levels);
-    }
-    return reports;
-}
-
-fn solve(reports: Vec<Vec<i32>>) {
+pub fn solve() {
+    let reports = parser::parse();
     let mut count = 0;
     for report in reports {
         let increasing = report.last().unwrap() > report.first().unwrap();
@@ -42,9 +26,4 @@ fn solve(reports: Vec<Vec<i32>>) {
         }
     }
     println!("{count}");
-}
-
-pub fn run() {
-    let reports = parse();
-    solve(reports);
 }

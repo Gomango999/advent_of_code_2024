@@ -1,18 +1,8 @@
+use super::parser;
 use regex::Regex;
-use std::fs::File;
-use std::io::{self, Read};
 
-fn parse() -> String {
-    let file = File::open("src/p03/in.txt").unwrap();
-    let mut reader = io::BufReader::new(file);
-
-    let mut content = String::new();
-    reader.read_to_string(&mut content).unwrap();
-    let content = content.replace('\n', "");
-    content
-}
-
-fn solve(text: String) {
+pub fn solve() {
+    let text = parser::parse();
     let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     let mut total = 0;
     let result: i32 = re
@@ -26,9 +16,4 @@ fn solve(text: String) {
         .sum();
     total += result;
     println!("{total}")
-}
-
-pub fn run() {
-    let text = parse();
-    solve(text);
 }

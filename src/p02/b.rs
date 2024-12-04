@@ -1,21 +1,4 @@
-use std::fs::File;
-use std::io::{self, BufRead};
-
-fn parse() -> Vec<Vec<i32>> {
-    let file = File::open("src/p02/in.txt").unwrap();
-    let reader = io::BufReader::new(file);
-
-    let mut reports = vec![];
-    for line in reader.lines() {
-        let levels: Vec<i32> = line
-            .unwrap()
-            .split_whitespace()
-            .map(|s| s.parse::<i32>().unwrap())
-            .collect();
-        reports.push(levels);
-    }
-    return reports;
-}
+use super::parser;
 
 fn is_safe(report: &Vec<i32>) -> bool {
     let increasing = report.last().unwrap() > report.first().unwrap();
@@ -38,7 +21,8 @@ fn is_safe(report: &Vec<i32>) -> bool {
     safe
 }
 
-fn solve(reports: Vec<Vec<i32>>) {
+pub fn solve() {
+    let reports = parser::parse();
     let mut count = 0;
     for report in reports {
         let mut safe = false;
@@ -53,9 +37,4 @@ fn solve(reports: Vec<Vec<i32>>) {
         }
     }
     println!("{count}");
-}
-
-pub fn run() {
-    let reports = parse();
-    solve(reports);
 }

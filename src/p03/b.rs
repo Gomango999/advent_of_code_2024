@@ -1,16 +1,5 @@
+use super::parser;
 use regex::Regex;
-use std::fs::File;
-use std::io::{self, Read};
-
-fn parse() -> String {
-    let file = File::open("src/p03/in.txt").unwrap();
-    let mut reader = io::BufReader::new(file);
-
-    let mut content = String::new();
-    reader.read_to_string(&mut content).unwrap();
-    let content = content.replace('\n', "");
-    content
-}
 
 #[derive(Debug, Copy, Clone)]
 enum Instruction {
@@ -25,7 +14,8 @@ struct Match {
     instruction: Instruction,
 }
 
-fn solve(text: String) {
+pub fn solve() {
+    let text = parser::parse();
     let re1 = Regex::new(r"do\(\)").unwrap();
     let re2 = Regex::new(r"don't\(\)").unwrap();
     let re3 = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
@@ -76,9 +66,4 @@ fn solve(text: String) {
         }
     }
     println!("{total}")
-}
-
-pub fn run() {
-    let text = parse();
-    solve(text);
 }

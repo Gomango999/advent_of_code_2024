@@ -11,14 +11,14 @@ fn main() {
         std::process::exit(1)
     });
     match config {
-        Config { day: 1, part: 'a' } => p01::a::run(),
-        Config { day: 1, part: 'b' } => p01::b::run(),
-        Config { day: 2, part: 'a' } => p02::a::run(),
-        Config { day: 2, part: 'b' } => p02::b::run(),
-        Config { day: 3, part: 'a' } => p03::a::run(),
-        Config { day: 3, part: 'b' } => p03::b::run(),
-        Config { day: 4, part: 'a' } => p04::a::run(),
-        Config { day: 4, part: 'b' } => p04::b::run(),
+        Config { day: 1, part: 'a' } => p01::a::solve(),
+        Config { day: 1, part: 'b' } => p01::b::solve(),
+        Config { day: 2, part: 'a' } => p02::a::solve(),
+        Config { day: 2, part: 'b' } => p02::b::solve(),
+        Config { day: 3, part: 'a' } => p03::a::solve(),
+        Config { day: 3, part: 'b' } => p03::b::solve(),
+        Config { day: 4, part: 'a' } => p04::a::solve(),
+        Config { day: 4, part: 'b' } => p04::b::solve(),
         _ => (),
     }
 }
