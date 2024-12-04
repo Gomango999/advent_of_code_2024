@@ -36,7 +36,9 @@ fn solve(grid: Vec<Vec<char>>) {
                     m_count += 1;
                 }
             }
-            // `alt_match` is used to remove the following case as a match
+            // `alt_match` is used to remove the following case as a match.
+            // Specifically, we can't be an X-MAS if the top left and bottom right
+            // corners match.
             // M.S
             // .A.
             // S.M
