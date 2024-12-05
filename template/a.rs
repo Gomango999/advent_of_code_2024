@@ -1,6 +1,6 @@
 use super::parser;
 
 pub fn solve() {
-    let () = parse();
+    let _ = parser::parse();
     todo!()
 }
