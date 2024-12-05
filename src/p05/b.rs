@@ -21,11 +21,11 @@ fn is_correctly_ordered(manual: &Vec<i32>, rules: &Vec<(i32, i32)>) -> bool {
 
 // mat[i][j] is true if there is a rule that says page i must come before page j
 fn make_rule_matrix(rules: &Vec<(i32, i32)>) -> [[bool; 101]; 101] {
-    let mut adj = [[false; 101]; 101];
+    let mut mat = [[false; 101]; 101];
     for &(lhs, rhs) in rules {
-        adj[lhs as usize][rhs as usize] = true;
+        mat[lhs as usize][rhs as usize] = true;
     }
-    adj
+    mat
 }
 
 pub fn solve() {
