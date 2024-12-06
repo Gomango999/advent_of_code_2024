@@ -43,7 +43,7 @@ fn find_start(grid: &Vec<Vec<char>>) -> (i32, i32) {
             }
         }
     }
-    return (0, 0); // will never reach here
+    panic!("Couldn't find the start position!")
 }
 
 struct Guard {
@@ -65,7 +65,7 @@ impl Guard {
     fn make_move(self: &mut Self, grid: &Vec<Vec<char>>) {
         let tried_directions = 0;
         while tried_directions < 4 {
-            // try move forward
+            // Try to move forward
             let (ox, oy) = Direction::get_offset(&self.dir);
             let (nx, ny) = (self.x + ox, self.y + oy);
 
@@ -81,7 +81,7 @@ impl Guard {
                 return;
             }
 
-            // didn't work, try turning right and try again
+            // We were blocked by a wall, turn right and try again
             self.dir = Direction::turn_right(&self.dir)
         }
         // We can only reach this spot if the guard ends up being surrounded
@@ -99,22 +99,11 @@ pub fn solve() {
     let grid = parser::parse();
     let (num_rows, num_cols) = get_dimensions(&grid);
 
-    // move the guard until they're outside.
+    // Simulate the guard until they exit the grid
     let mut guard = Guard::new(&grid);
     let mut seen = vec![vec![false; num_cols as usize]; num_rows as usize];
     while is_inside_grid(&guard.x, &guard.y, &grid) {
         seen[guard.y as usize][guard.x as usize] = true;
         guard.make_move(&grid);
     }
-
-    // count up tiles seen by the guard.
-    let mut count = 0;
-    for y in 0..num_rows {
-        for x in 0..num_cols {
-            if seen[y as usize][x as usize] {
-                count += 1;
-            }
-        }
-    }
-    println!("{count}");
 }

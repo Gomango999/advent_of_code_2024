@@ -47,7 +47,7 @@ fn find_start(grid: &Grid) -> (i32, i32) {
             }
         }
     }
-    return (0, 0); // will never reach here
+    panic!("Couldn't find the start position!")
 }
 
 fn is_inside_grid(x: &i32, y: &i32, grid: &Grid) -> bool {
@@ -78,7 +78,7 @@ impl State {
         let mut state = self.clone();
         let tried_directions = 0;
         while tried_directions < 4 {
-            // Try move forward
+            // Try to move forward
             let (ox, oy) = Direction::get_offset(&state.dir);
             let (nx, ny) = (state.x + ox, state.y + oy);
 
@@ -92,7 +92,7 @@ impl State {
                 return Some(state);
             }
 
-            // Didn't work, try turning right and try again
+            // We were blocked by a wall, turn right and try again
             state.dir = Direction::turn_right(&state.dir);
         }
         None
@@ -137,7 +137,7 @@ fn check_cycle(state: &State, grid: &Grid) -> bool {
     // seen[y][x][d] means that the guard has gone to [x][y] with direction d before
     let mut seen = vec![vec![vec![false; 4]; num_cols as usize]; num_rows as usize];
 
-    // Simulate guard movement
+    // Simulate guard movement form the start
     let mut state = State::new(&grid);
     while state.is_inside_grid(&grid) {
         // If we've been in this position before, then we've found a cycle!
@@ -157,7 +157,7 @@ pub fn solve() {
     // obstacle at. Each one requires the guard to walk for at most 130 * 130 * 4
     // = 67600 tiles before we can confirm if there's a loop (and on average,
     // alot less than that.) This means about ~350mil operations, which is
-    // feasibly run. Takes about ~15s on my machine
+    // feasibly run. Takes about ~15s on my i5-11044.
 
     let grid = parser::parse();
     let (num_rows, num_cols) = get_dimensions(&grid);
