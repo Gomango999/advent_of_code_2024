@@ -156,7 +156,7 @@ pub fn solve() {
     // to her own devices. Thus there are only 5200 spots to test placing an
     // obstacle at. Each one requires the guard to walk for at most 130 * 130 * 4
     // = 67600 tiles before we can confirm if there's a loop (and on average,
-    // alot less than that.) This means about ~350mil operations, which is
+    // alot less than that.) This means about ~O(350mil) operations, which is
     // feasibly run. Takes about ~15s on my i5-11044.
 
     let grid = parser::parse();
