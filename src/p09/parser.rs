@@ -1,9 +1,15 @@
-use itertools::Itertools;
 use std::fs::File;
 use std::io::{self, BufRead};
 
+#[derive(Clone, Copy, Debug)]
+pub struct FileBlock {
+    pub id: u64,
+    pub pos: usize,
+    pub size: usize,
+}
+
 pub struct Input {
-    pub memory_sizes: MemorySizes,
+    pub file_blocks: Vec<FileBlock>,
     pub memory: Vec<Option<u64>>,
 }
 
@@ -20,7 +26,25 @@ pub fn parse() -> Input {
         .chars()
         .filter_map(|c| c.to_digit(10).map(|x| x as usize))
         .collect();
-    let memory_sizes = MemorySizes::new(raw_memory_sizes.clone());
+
+    let mut id = 0;
+    let mut pos = 0;
+    let blocks = raw_memory_sizes
+        .iter()
+        .enumerate()
+        .filter_map(|(i, &n)| {
+            let block = if i % 2 == 0 {
+                let result = Some(FileBlock { id, pos, size: n });
+                id += 1;
+                result
+            } else {
+                None
+            };
+            pos += n;
+            block
+        })
+        .collect();
+
     let memory: Vec<Option<u64>> = raw_memory_sizes
         .iter()
         .enumerate()
@@ -36,7 +60,7 @@ pub fn parse() -> Input {
     // Assuming an average size of 5 per memory block, we get that memory_sizes
     // will have length about 20,000 * 5 = 100,000.
     Input {
-        memory_sizes,
+        file_blocks: blocks,
         memory,
     }
 }
