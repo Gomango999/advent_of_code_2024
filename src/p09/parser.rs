@@ -29,7 +29,7 @@ pub fn parse() -> Input {
 
     let mut id = 0;
     let mut pos = 0;
-    let blocks = raw_memory_sizes
+    let file_blocks = raw_memory_sizes
         .iter()
         .enumerate()
         .filter_map(|(i, &n)| {
@@ -57,10 +57,9 @@ pub fn parse() -> Input {
         })
         .flatten()
         .collect();
-    // Assuming an average size of 5 per memory block, we get that memory_sizes
-    // will have length about 20,000 * 5 = 100,000.
+
     Input {
-        file_blocks: blocks,
+        file_blocks,
         memory,
     }
 }
