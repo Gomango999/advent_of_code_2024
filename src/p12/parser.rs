@@ -8,6 +8,8 @@ pub fn parse() -> Vec<Vec<char>> {
     let mut garden = vec![];
     for line in reader.lines() {
         let row = line.unwrap().chars().collect();
+    let n = garden.len();
+    let m = garden[0].len();
         garden.push(row)
     }
     garden
