@@ -9,6 +9,7 @@ mod p08;
 mod p09;
 mod p10;
 mod p11;
+mod p13;
 
 use aoc_2024::Config;
 
@@ -40,6 +41,8 @@ fn main() {
         Config { day: 10, part: 'b' } => p10::b::solve(),
         Config { day: 11, part: 'a' } => p11::a::solve(),
         Config { day: 11, part: 'b' } => p11::b::solve(),
+        Config { day: 13, part: 'a' } => p13::a::solve(),
+        Config { day: 13, part: 'b' } => p13::b::solve(),
         _ => {
             eprintln!("Not implemented yet!");
             std::process::exit(1)
