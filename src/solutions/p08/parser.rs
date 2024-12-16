@@ -9,7 +9,7 @@ pub struct Input {
 }
 
 pub fn parse() -> Input {
-    let file = File::open("src/p08/in.txt").unwrap();
+    let file = File::open("src/solutions/p08/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     let lines: Vec<String> = reader.lines().map(|line| line.unwrap()).collect();

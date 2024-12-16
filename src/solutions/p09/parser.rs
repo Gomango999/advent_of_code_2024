@@ -17,7 +17,7 @@ pub struct Input {
 /// 1. Alternating numbers reprseenting the free and used space on disk
 /// 2. A vector of options representing each block of memory on disk in order.
 pub fn parse() -> Input {
-    let file = File::open("src/p09/in.txt").unwrap();
+    let file = File::open("src/solutions/p09/in.txt").unwrap();
     let mut reader = io::BufReader::new(file);
 
     let mut line = String::new();

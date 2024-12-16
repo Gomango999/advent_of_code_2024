@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Rem};
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Vec2 {
     pub x: i64,
     pub y: i64,
@@ -15,9 +15,9 @@ impl Vec2 {
         (self.x, self.y)
     }
 
-    pub fn to_usize(&self) -> (usize, usize) {
-        (self.x as usize, self.y as usize)
-    }
+    // pub fn to_usize(&self) -> (usize, usize) {
+    //     (self.x as usize, self.y as usize)
+    // }
 }
 
 impl Add for Vec2 {

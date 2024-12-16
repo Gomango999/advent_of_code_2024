@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 
 pub fn parse_file() -> (Vec<i32>, Vec<i32>) {
-    let file = File::open("src/p01/in.txt").unwrap();
+    let file = File::open("src/solutions/p01/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     let mut v1 = vec![];

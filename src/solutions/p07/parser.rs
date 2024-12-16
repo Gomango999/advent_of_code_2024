@@ -8,7 +8,7 @@ pub struct Calibration {
 }
 
 pub fn parse() -> Vec<Calibration> {
-    let file = File::open("src/p07/in.txt").unwrap();
+    let file = File::open("src/solutions/p07/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     reader

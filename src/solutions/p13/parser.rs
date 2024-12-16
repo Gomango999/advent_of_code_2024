@@ -39,7 +39,7 @@ pub struct Config {
 }
 
 pub fn parse() -> Vec<Config> {
-    let file = File::open("src/p13/in.txt").unwrap();
+    let file = File::open("src/solutions/p13/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     let re1 = Regex::new(r"Button .: X\+(\d+), Y\+(\d+)").unwrap();

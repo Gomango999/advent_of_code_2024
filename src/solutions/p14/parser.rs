@@ -9,7 +9,7 @@ pub struct Robot {
 }
 
 pub fn parse() -> Vec<Robot> {
-    let file = File::open("src/p14/in.txt").unwrap();
+    let file = File::open("src/solutions/p14/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     let re = Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)").unwrap();

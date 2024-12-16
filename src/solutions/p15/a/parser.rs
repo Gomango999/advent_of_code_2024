@@ -9,7 +9,7 @@ enum InputState {
 }
 
 pub fn parse() -> (Room, Vec<Direction>) {
-    let file = File::open("src/p15/in.txt").unwrap();
+    let file = File::open("src/solutions/p15/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     let mut state = InputState::Grid;

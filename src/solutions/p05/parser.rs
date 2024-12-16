@@ -12,7 +12,7 @@ pub struct Input {
 }
 
 pub fn parse() -> Input {
-    let file = File::open("src/p05/in.txt").unwrap();
+    let file = File::open("src/solutions/p05/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     let mut rules = vec![];

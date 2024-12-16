@@ -1,5 +1,7 @@
 use super::vec2::Vec2;
 
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[repr(u8)]
 pub enum Direction {
     Up,
     Right,
@@ -8,6 +10,17 @@ pub enum Direction {
 }
 
 impl Direction {
+    pub const NUM_VARIANTS: usize = 4;
+
+    pub fn all() -> [Direction; Direction::NUM_VARIANTS] {
+        [
+            Direction::Up,
+            Direction::Left,
+            Direction::Right,
+            Direction::Down,
+        ]
+    }
+
     pub fn turn_left(&self) -> Self {
         match self {
             Direction::Up => Direction::Left,

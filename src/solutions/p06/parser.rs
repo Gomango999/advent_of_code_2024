@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 
 pub fn parse() -> Vec<Vec<char>> {
-    let file = File::open("src/p06/in.txt").unwrap();
+    let file = File::open("src/solutions/p06/in.txt").unwrap();
     let reader = io::BufReader::new(file);
 
     let mut grid = vec![];
