@@ -1,5 +1,5 @@
-use super::direction::{dir_to_offset, Direction};
-use super::vec2::*;
+use super::super::Direction;
+use super::super::Vec2;
 
 type GridA = Vec<Vec<char>>;
 
@@ -52,7 +52,7 @@ impl Room {
 
             if previous_object == '.' {
                 // Moved something into air. We can end the simulation.
-                let robot = self.robot + dir_to_offset(&dir);
+                let robot = self.robot + dir.to_offset();
                 self.grid = grid;
                 self.robot = robot;
                 return;
@@ -64,7 +64,7 @@ impl Room {
                 return;
             }
 
-            pos = pos + dir_to_offset(&dir);
+            pos = pos + dir.to_offset();
         }
         panic!("Timeout while simulating")
     }

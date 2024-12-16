@@ -1,4 +1,5 @@
 use super::parser::*;
+use super::Vec2;
 use std::fs::File;
 use std::io::Write;
 

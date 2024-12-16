@@ -10,6 +10,14 @@ impl Vec2 {
     pub fn new(x: i64, y: i64) -> Self {
         Vec2 { x, y }
     }
+
+    pub fn to_tuple(&self) -> (i64, i64) {
+        (self.x, self.y)
+    }
+
+    pub fn to_usize(&self) -> (usize, usize) {
+        (self.x as usize, self.y as usize)
+    }
 }
 
 impl Add for Vec2 {

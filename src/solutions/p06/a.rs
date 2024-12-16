@@ -1,40 +1,14 @@
 use super::parser;
+use super::Direction;
 
-enum Direction {
-    Up,
-    Right,
-    Down,
-    Left,
-}
-
-impl Direction {
-    fn turn_right(dir: &Direction) -> Direction {
-        match dir {
-            Direction::Up => Direction::Right,
-            Direction::Right => Direction::Down,
-            Direction::Down => Direction::Left,
-            Direction::Left => Direction::Up,
-        }
-    }
-
-    fn get_offset(dir: &Direction) -> (i32, i32) {
-        match dir {
-            Direction::Up => (0, -1),
-            Direction::Right => (1, 0),
-            Direction::Down => (0, 1),
-            Direction::Left => (-1, 0),
-        }
-    }
-}
-
-fn get_dimensions(grid: &Vec<Vec<char>>) -> (i32, i32) {
+fn get_dimensions(grid: &Vec<Vec<char>>) -> (i64, i64) {
     let rows = grid.len();
     let cols = grid[0].len();
-    (rows as i32, cols as i32)
+    (rows as i64, cols as i64)
 }
 
 // Returns the (x,y) coordinates of the guard's starting position
-fn find_start(grid: &Vec<Vec<char>>) -> (i32, i32) {
+fn find_start(grid: &Vec<Vec<char>>) -> (i64, i64) {
     let (n, m) = get_dimensions(grid);
     for y in 0..n {
         for x in 0..m {
@@ -47,8 +21,8 @@ fn find_start(grid: &Vec<Vec<char>>) -> (i32, i32) {
 }
 
 struct Guard {
-    x: i32,
-    y: i32,
+    x: i64,
+    y: i64,
     dir: Direction,
 }
 
@@ -66,7 +40,7 @@ impl Guard {
         let tried_directions = 0;
         while tried_directions < 4 {
             // Try to move forward
-            let (ox, oy) = Direction::get_offset(&self.dir);
+            let (ox, oy) = self.dir.to_offset().to_tuple();
             let (nx, ny) = (self.x + ox, self.y + oy);
 
             if !is_inside_grid(&nx, &ny, &grid) {
@@ -82,7 +56,7 @@ impl Guard {
             }
 
             // We were blocked by a wall, turn right and try again
-            self.dir = Direction::turn_right(&self.dir)
+            self.dir = self.dir.turn_right();
         }
         // We can only reach this spot if the guard ends up being surrounded
         // on all 4 sides by obstructions.
@@ -90,7 +64,7 @@ impl Guard {
     }
 }
 
-fn is_inside_grid(x: &i32, y: &i32, grid: &Vec<Vec<char>>) -> bool {
+fn is_inside_grid(x: &i64, y: &i64, grid: &Vec<Vec<char>>) -> bool {
     let (n, m) = get_dimensions(grid);
     (0..n).contains(&y) && (0..m).contains(&x)
 }

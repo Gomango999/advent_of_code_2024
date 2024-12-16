@@ -1,4 +1,5 @@
 use super::parser::*;
+use super::Vec2;
 
 const ROOM_SIZE: Vec2 = Vec2 { x: 101, y: 103 };
 // const ROOM_SIZE: Vec2 = Vec2 { x: 11, y: 7 };

@@ -1,5 +1,5 @@
-use super::direction::Direction;
-use super::room_a::Room;
+use super::super::Direction;
+use super::room::{Object, Room};
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -24,7 +24,16 @@ pub fn parse() -> (Room, Vec<Direction>) {
                     state = InputState::Instructions;
                     continue;
                 }
-                let row: Vec<char> = line.chars().collect();
+                let mut row = vec![];
+                for ch in line.chars() {
+                    match ch {
+                        '#' => row.extend([Object::Wall, Object::Wall]),
+                        '.' => row.extend([Object::Empty, Object::Empty]),
+                        '@' => row.extend([Object::Robot, Object::Empty]),
+                        'O' => row.extend([Object::BoxLeft, Object::BoxRight]),
+                        _ => panic!("Unknown character!"),
+                    }
+                }
                 grid.push(row)
             }
             InputState::Instructions => {
@@ -35,7 +44,7 @@ pub fn parse() -> (Room, Vec<Direction>) {
                         '<' => Direction::Left,
                         '>' => Direction::Right,
                         'v' => Direction::Down,
-                        _ => panic!("Impossible!"),
+                        _ => panic!("Unknown instruction!"),
                     })
                     .collect();
                 instructions.extend(row);

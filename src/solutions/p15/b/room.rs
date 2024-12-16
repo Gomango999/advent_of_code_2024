@@ -1,4 +1,4 @@
-use super::direction::*;
+use super::super::Direction;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Object {
@@ -72,7 +72,7 @@ impl Room {
             },
             Object::BoxRight => self.is_pushable(dir, y, x - 1),
             Object::Robot => {
-                let offset = dir_to_offset(dir);
+                let offset = dir.to_offset();
                 let y = (y as i64 + offset.y) as usize;
                 let x = (x as i64 + offset.x) as usize;
                 self.is_pushable(dir, y, x)
@@ -123,7 +123,7 @@ impl Room {
                 self.push(dir, y, x - 1)
             }
             Object::Robot => {
-                let offset = dir_to_offset(dir);
+                let offset = dir.to_offset();
                 let ny = (y as i64 + offset.y) as usize;
                 let nx = (x as i64 + offset.x) as usize;
                 if self.is_pushable(dir, ny, nx) {

@@ -1,7 +1,8 @@
-use super::parser_a;
+mod parser;
+mod room;
 
 pub fn solve() {
-    let (mut room, instructions) = parser_a::parse();
+    let (mut room, instructions) = parser::parse();
 
     for instruction in instructions {
         room.update(&instruction);
