@@ -41,7 +41,7 @@ impl Div<i64> for Vec2 {
 impl Rem for Vec2 {
     type Output = Self;
     fn rem(self, oth: Vec2) -> Self::Output {
-        Vec2::new(self.x % oth.x, self.y % oth.y)
+        Vec2::new((self.x % oth.x + oth.x) % oth.x, (self.y % oth.y + oth.y) % oth.y)
     }
 }
 
