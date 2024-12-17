@@ -39,6 +39,15 @@ impl Direction {
         }
     }
 
+    pub fn flip(&self) -> Self {
+        match self {
+            Direction::Up => Direction::Down,
+            Direction::Right => Direction::Left,
+            Direction::Down => Direction::Up,
+            Direction::Left => Direction::Right,
+        }
+    }
+
     pub fn to_offset(&self) -> Vec2 {
         match self {
             Direction::Up => Vec2::new(0, -1),

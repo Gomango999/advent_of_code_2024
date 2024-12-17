@@ -3,6 +3,7 @@ use std::io::{self, BufRead};
 
 type Grid = Vec<Vec<char>>;
 
+#[derive(Clone)]
 pub struct Input {
     pub height: usize,
     pub width: usize,
