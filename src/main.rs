@@ -39,6 +39,8 @@ fn main() {
         Config { day: 15, part: 'b' } => solutions::p15::b::solve(),
         Config { day: 16, part: 'a' } => solutions::p16::a::solve(),
         Config { day: 16, part: 'b' } => solutions::p16::b::solve(),
+        Config { day: 17, part: 'a' } => solutions::p17::a::solve(),
+        Config { day: 17, part: 'b' } => solutions::p17::b::solve(),
         _ => {
             eprintln!("Not implemented yet!");
             std::process::exit(1)
