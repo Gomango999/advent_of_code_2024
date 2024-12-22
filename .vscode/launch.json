@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceFolder}/target/debug/aoc_2024",
-            "args": ["12", "b"],
+            "args": ["21", "a"],
             "cwd": "${workspaceFolder}"
         }
     ]
