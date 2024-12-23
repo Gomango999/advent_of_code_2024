@@ -181,25 +181,6 @@ fn get_code_complexity(code: &Code) -> u64 {
     };
     let &num_inputs = min_inputs.get(&end).expect("Couldn't type the code?!");
 
-    // Back tracking - written by Github Copilot
-    // let mut sequence = Vec::new();
-    // let mut current_state = end;
-
-    // while let Some(prev) = prev_state[&current_state] {
-    //     for input in ['^', '<', '>', 'v', 'A'] {
-    //         if let Some(next_state) = prev.simulate(input) {
-    //             if next_state == current_state {
-    //                 sequence.push(input);
-    //                 current_state = prev;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-
-    // sequence.reverse();
-    // println!("{}", sequence.iter().collect::<String>());
-
     num_inputs
 }
 

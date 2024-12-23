@@ -85,6 +85,7 @@ fn char_to_location(ch: char) -> Vec2 {
 /// Calculates the list of directions that need to be pressed to get from point
 /// A to point B. These directions will be chosen in such a way that they
 /// minimise the number of moves needed to create the key-presses for each move.
+/// All paths are prefixed with 'A'.
 fn get_path(start: &Vec2, &end: &Vec2) -> Code {
     // Calculate that the (unoptimised) set of moves that we need to make.
     // Moves stores two tuples: (direction, number of moves)
@@ -114,65 +115,179 @@ fn get_path(start: &Vec2, &end: &Vec2) -> Code {
         ('^', '>') => {
             moves = (moves.1, moves.0);
         }
+        ('^', '<') => {
+            moves = (moves.1, moves.0);
+        }
         _ => {}
     }
 
     // Finally, we confirm that this pattern does not let us go to (-2, 0), which
     // is illegal on both the numpad and keypad. This can always be resolved by
     // simply swapping the two directions.
-    if start.x == -2 && end.y == 0 && moves.0 .0 == 'v' {
+    if start.x == -2 && end.y == 0 && (moves.0 .0 == 'v' || moves.0 .0 == '^') {
         moves = (moves.1, moves.0);
     } else if start.y == 0 && end.x == -2 && moves.0 .0 == '<' {
         moves = (moves.1, moves.0);
     }
 
     // Finally, we convert out moves into a list of characters.
-    let mut path = vec![];
+    let mut path = vec!['A'];
 
     for (direction, count) in [moves.0, moves.1] {
         for _ in 0..count {
             path.push(direction);
         }
     }
-
     path.push('A');
 
     path
 }
 
-fn get_inputs(code: &Code) -> Code {
-    // We add an 'A' to the front, to model the idea that the robot arm starts
-    // off at A, and needs to travel to the first digit.
+/// For a sequence of key presses, we represent the number of times each pair of
+/// characters appears in that sequence.
+#[derive(Clone)]
+struct NumPairs {
+    matrix: [[u64; 15]; 15],
+}
+
+impl NumPairs {
+    fn new() -> Self {
+        Self {
+            matrix: [[0; 15]; 15],
+        }
+    }
+
+    // Creates a pairs matrix from a code. This is done by iterating through
+    // the code and incrementing the count of the pair of characters.
+    fn from_code(code: &Code) -> Self {
+        let mut num_pairs = Self::new();
+        for window in code.windows(2) {
+            let &[start_ch, end_ch] = window else {
+                panic!()
+            };
+            num_pairs[(start_ch, end_ch)] += 1;
+        }
+        num_pairs
+    }
+
+    fn char_to_index(ch: char) -> usize {
+        match ch {
+            'A' => 0,
+            '0' => 1,
+            '1' => 2,
+            '2' => 3,
+            '3' => 4,
+            '4' => 5,
+            '5' => 6,
+            '6' => 7,
+            '7' => 8,
+            '8' => 9,
+            '9' => 10,
+            '^' => 11,
+            '<' => 12,
+            'v' => 13,
+            '>' => 14,
+            _ => panic!("Invalid character!"),
+        }
+    }
+
+    fn index_to_char(index: usize) -> char {
+        match index {
+            0 => 'A',
+            1 => '0',
+            2 => '1',
+            3 => '2',
+            4 => '3',
+            5 => '4',
+            6 => '5',
+            7 => '6',
+            8 => '7',
+            9 => '8',
+            10 => '9',
+            11 => '^',
+            12 => '<',
+            13 => 'v',
+            14 => '>',
+            _ => panic!("Invalid index!"),
+        }
+    }
+
+    fn count_pairs(&self) -> u64 {
+        self.matrix.iter().map(|row| row.iter().sum::<u64>()).sum()
+    }
+}
+
+impl std::ops::Add for NumPairs {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        let mut result = Self::new();
+        for i in 0..15 {
+            for j in 0..15 {
+                result.matrix[i][j] = self.matrix[i][j] + other.matrix[i][j];
+            }
+        }
+        result
+    }
+}
+
+impl std::ops::Mul<u64> for NumPairs {
+    type Output = Self;
+
+    fn mul(self, other: u64) -> Self {
+        let mut result = Self::new();
+        for i in 0..15 {
+            for j in 0..15 {
+                result.matrix[i][j] = self.matrix[i][j] * other;
+            }
+        }
+        result
+    }
+}
+
+impl std::ops::Index<(char, char)> for NumPairs {
+    type Output = u64;
+
+    fn index(&self, index: (char, char)) -> &u64 {
+        &self.matrix[Self::char_to_index(index.0)][Self::char_to_index(index.1)]
+    }
+}
+
+impl std::ops::IndexMut<(char, char)> for NumPairs {
+    fn index_mut(&mut self, index: (char, char)) -> &mut u64 {
+        &mut self.matrix[Self::char_to_index(index.0)][Self::char_to_index(index.1)]
+    }
+}
+
+/// Takes in a NumPairs matrix and returns the next NumPairs matrix that would
+/// arise from inputting all the moves between each pair of characters.
+fn get_input_pairs(num_pairs: &NumPairs) -> NumPairs {
+    let mut new_num_pairs = NumPairs::new();
+    for i in 0..15 {
+        for j in 0..15 {
+            // For each pair of moves, we calculate the new pairs generated by
+            // the path between them, and add them on to our current running
+            // total.
+            let start_ch = NumPairs::index_to_char(i);
+            let end_ch = NumPairs::index_to_char(j);
+            let path = get_path(&char_to_location(start_ch), &char_to_location(end_ch));
+            let path_pairs = NumPairs::from_code(&path);
+            new_num_pairs = new_num_pairs + path_pairs * num_pairs[(start_ch, end_ch)];
+        }
+    }
+    new_num_pairs
+}
+
+fn get_code_complexity(code: &Code, num_robots: usize) -> u64 {
+    // Prefix the code with the character 'A' to represent the initial state.
     let mut code = code.clone();
     code.insert(0, 'A');
-    let mut input = vec![];
-    for window in code.windows(2) {
-        let &[start_ch, end_ch] = window else {
-            panic!()
-        };
-        let start = char_to_location(start_ch);
-        let end = char_to_location(end_ch);
-        let path = get_path(&start, &end);
-        input.extend(path)
-    }
-    input
-}
 
-#[allow(dead_code)]
-fn print_code(code: &Code) {
-    let code_str: String = code.iter().cloned().collect();
-    println!("{}", code_str);
-}
-
-fn get_code_input(code: &Code, num_robots: usize) -> Code {
-    let mut code = code.clone();
-    print_code(&code);
-    for i in 0..num_robots {
-        code = get_inputs(&code);
-        println!("{i} {}", code.len());
-        // print_code(&code);
+    let mut num_pairs = NumPairs::from_code(&code);
+    for _ in 0..num_robots + 1 {
+        num_pairs = get_input_pairs(&num_pairs);
     }
-    code
+    num_pairs.count_pairs()
 }
 
 fn get_code_numeric(code: &Code) -> u64 {
@@ -188,8 +303,7 @@ pub fn solve() {
     let complexity_sum: u64 = codes
         .into_iter()
         .map(|code| {
-            let code_input = get_code_input(&code, NUM_ROBOTS);
-            let complexity = code_input.len();
+            let complexity = get_code_complexity(&code, NUM_ROBOTS);
             let code_numeric = get_code_numeric(&code);
             println!("{complexity} {code_numeric}");
             complexity as u64 * code_numeric
