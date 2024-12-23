@@ -136,6 +136,7 @@ fn get_code_complexity(code: &Code) -> u64 {
     // min_inputs.get(state) is the minimum number of inputs the Historians have
     // to make to reach a certain state.
     let mut min_inputs: HashMap<State, u64> = HashMap::new();
+    let mut prev_state: HashMap<State, Option<State>> = HashMap::new();
 
     let mut queue = VecDeque::new();
     // Robot arms are all on their respective 'A' buttons.
@@ -149,18 +150,19 @@ fn get_code_complexity(code: &Code) -> u64 {
         x3: 2,
         y3: 0,
     };
-    queue.push_back((start, 0));
+    queue.push_back((start, None, 0));
 
-    while let Some((curr, num_inputs)) = queue.pop_front() {
+    while let Some((curr, prev, num_inputs)) = queue.pop_front() {
         if min_inputs.contains_key(&curr) {
             continue;
         }
         min_inputs.insert(curr, num_inputs);
+        prev_state.insert(curr, prev);
 
         let possible_inputs = ['^', '<', '>', 'v', 'A'];
         for input in possible_inputs {
             if let Some(next) = curr.simulate(input) {
-                queue.push_back((next, num_inputs + 1));
+                queue.push_back((next, Some(curr), num_inputs + 1));
             }
         }
     }
@@ -178,6 +180,26 @@ fn get_code_complexity(code: &Code) -> u64 {
         y3: 0,
     };
     let &num_inputs = min_inputs.get(&end).expect("Couldn't type the code?!");
+
+    // Back tracking - written by Github Copilot
+    // let mut sequence = Vec::new();
+    // let mut current_state = end;
+
+    // while let Some(prev) = prev_state[&current_state] {
+    //     for input in ['^', '<', '>', 'v', 'A'] {
+    //         if let Some(next_state) = prev.simulate(input) {
+    //             if next_state == current_state {
+    //                 sequence.push(input);
+    //                 current_state = prev;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // sequence.reverse();
+    // println!("{}", sequence.iter().collect::<String>());
+
     num_inputs
 }
 
@@ -194,6 +216,7 @@ pub fn solve() {
         .map(|code| {
             let complexity = get_code_complexity(&code);
             let numeric_part = get_code_numeric(&code);
+            println!("{complexity} {numeric_part}");
             complexity as u64 * numeric_part
         })
         .sum();
