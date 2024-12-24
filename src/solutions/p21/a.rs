@@ -197,7 +197,7 @@ pub fn solve() {
         .map(|code| {
             let complexity = get_code_complexity(&code);
             let numeric_part = get_code_numeric(&code);
-            println!("{complexity} {numeric_part}");
+            // println!("{complexity} {numeric_part}");
             complexity as u64 * numeric_part
         })
         .sum();

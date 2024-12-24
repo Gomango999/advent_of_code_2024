@@ -1,59 +1,24 @@
-//! My first attempt for this problem was a greedy solution. I conclude that
-//! when moving two keys on a keypad, the order in which you do it doesn't matter
-//! provided that you take the shortest manhattan distance path, and you group
-//! the same directions together. For example, to go from 7 to 2 on the numpad,
-//! you can do either DDR or RDD. DRD is always suboptimal since on the robot
-//! that has to enter these keys, you have to waste unecessary time moving from
-//! D to R to D again when you can ust handle al the Ds together.
+//! This solution took many many tries:
 //!
-//! However, after implementing this and submitting, it didn't work. I ended
-//! up coding a BFS style solution for A, which literally looks through
-//! every possible state of robot arm positions across all 3 robots to find
-//! the shortest number of moves required to get the output.
+//!     1. Greedy solution, where we simply assume that any path will work
 //!
-//! Using my solution for part A, I was able to compare the outputs and see why
-//! my solution seemed to be giving longer answers. Here is one such example
-//! where my BFS outperformed.
+//!     2. Optimised Greedy solution, where we notice that certain patterns
+//!     are bad. E.g. `>` then `^` is always bad, and should instead be replaced
+//!     with `^` then `>`
 //!
-//! BFS Solution
-//! <vA<AA>^>AvAA^<A>A<v<A>^>AAAvA^A<v<A>A^>AAvA^A<A>A<v<A>A^>A<A>vA^A (66)
-//!   v <<   A >>  ^ A   <   AAA > A   < v  AA > A ^ A   < v  A ^  > A
-//!          <       A       ^^^   A        vv   >   A        v      A
-//!                  0             8                 3               A
-//! Greedy Solution
-//! v<A<AA>>^AvAA<^A>Av<<A>>^AAAvA^Av<A>^Av<<A>>^AAvA<^A>Av<A<A>>^AvA<^A>A (70)
-//!   v <<   A >>  ^ A   <   AAA > A  v  A   <   AA >  ^ A  v <   A >  ^ A
-//!          <       A       ^^^   A     >       vv      A        v      A
-//!                  0             8                     3               A
+//!     3. Dynamic Programming Solution, where notice that each move between two
+//!     keys are independent of each other because of the need to reset all robot
+//!     arm positions to 'A'.
 //!
-//! Looking at these two, I can see that the BFS solution was able to save 4
-//! moves by grouping together a "v" press while moving back to the "<", whereas
-//! the greedy solution separated the move to and back from the "<" into it's
-//! own "group". That is, the BFS had "<vAA>A^A" to input "vv>A", whereas the
-//! greedy did "vA<AA>^A" to output ">vvA". The problem is that the "A<A" sequence
-//! requires moving all the way to the left button and back with nothing else,
-//! wherease the BFS solution decides to do "(A)<vA" instead, which picks up
-//! an extra "v" press for free on the way back.
-//!
-//! The lesson is that the pattern v> is always preferable to >v. And in fact
-//! any pattern that requires a left move by itself is always worse. Therefore:
-//! >v is worse than v>
-//! v< is worse than <v
-//! ^> is worse than >^
-//! Also now that we know order does matter, the simplification I made about
-//! allowing the robot arm to exit the grid now no longer applies.
-//!
-//! After implementing the optimisation, I'm realising that actually computing
-//! the code that needs to be pressed is growing quite long. It seems that
-//! the code roughly doubles for every layer of indirection, so we'll end up
-//! with a string that is 2^25 ~= 33,554,432 bytes long. However in practice,
-//! at iteration 21, we use 2.5 billion bytes, and we run out of memory.
-//!
-//! We'll need to optimise this to only keep track of the number of _pairs_ of
-//! each direction.
+//! Only after a considerable amount of coding and trying the third approach did we
+//! get the AC!
 
 use super::parser::*;
 use super::Vec2;
+use itertools::Itertools;
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::sync::OnceLock;
 
 // Converts a given button to a vector coordinate. This works regardless of whether
 // we give it a button from the numpad or a robot's input. The coordinates are
@@ -85,11 +50,10 @@ fn char_to_location(ch: char) -> Vec2 {
 /// Calculates the list of directions that need to be pressed to get from point
 /// A to point B. These directions will be chosen in such a way that they
 /// minimise the number of moves needed to create the key-presses for each move.
-/// All paths are prefixed with 'A'.
-fn get_path(start: &Vec2, &end: &Vec2) -> Code {
-    // Calculate that the (unoptimised) set of moves that we need to make.
-    // Moves stores two tuples: (direction, number of moves)
-    let mut moves = (('?', 0), ('?', 0));
+fn get_possible_paths(start: &Vec2, &end: &Vec2) -> Vec<Code> {
+    // Calculate the moves that we need to make in each direction.
+    type Move = ((char, i64), (char, i64));
+    let mut moves: Move = (('?', 0), ('?', 0));
 
     if start.x < end.x {
         moves.0 = ('>', (start.x - end.x).abs());
@@ -103,191 +67,112 @@ fn get_path(start: &Vec2, &end: &Vec2) -> Code {
         moves.1 = ('^', (start.y - end.y).abs());
     }
 
-    // Next, we optimise them to remove bad patterns that will cause extra
-    // key presses. These are resolved by swapping the two directions.
-    match (moves.0 .0, moves.1 .0) {
-        ('>', 'v') => {
-            moves = (moves.1, moves.0);
-        }
-        ('v', '<') => {
-            moves = (moves.1, moves.0);
-        }
-        ('^', '>') => {
-            moves = (moves.1, moves.0);
-        }
-        ('^', '<') => {
-            moves = (moves.1, moves.0);
-        }
-        _ => {}
-    }
+    // These are the two different ways we can move between two points.
+    // E.g. If `moves1` represents `vv<`, then `moves2` represents `<vv`
+    let moves1 = moves;
+    let moves2 = (moves.1, moves.0);
 
-    // Finally, we confirm that this pattern does not let us go to (-2, 0), which
-    // is illegal on both the numpad and keypad. This can always be resolved by
-    // simply swapping the two directions.
-    if start.x == -2 && end.y == 0 && (moves.0 .0 == 'v' || moves.0 .0 == '^') {
-        moves = (moves.1, moves.0);
-    } else if start.y == 0 && end.x == -2 && moves.0 .0 == '<' {
-        moves = (moves.1, moves.0);
-    }
-
-    // Finally, we convert out moves into a list of characters.
-    let mut path = vec!['A'];
-
-    for (direction, count) in [moves.0, moves.1] {
-        for _ in 0..count {
-            path.push(direction);
-        }
-    }
-    path.push('A');
-
-    path
-}
-
-/// For a sequence of key presses, we represent the number of times each pair of
-/// characters appears in that sequence.
-#[derive(Clone)]
-struct NumPairs {
-    matrix: [[u64; 15]; 15],
-}
-
-impl NumPairs {
-    fn new() -> Self {
-        Self {
-            matrix: [[0; 15]; 15],
+    /// Checks if the moves are valid by checking whether it will exit the
+    /// numpad space. Note this works for both the numpad and directional keypad.
+    fn is_move_valid(moves: &Move, start: &Vec2, end: &Vec2) -> bool {
+        if start.x == -2 && end.y == 0 && (moves.0 .0 == 'v' || moves.0 .0 == '^') {
+            return false;
+        } else if start.y == 0 && end.x == -2 && moves.0 .0 == '<' {
+            return false;
+        } else {
+            return true;
         }
     }
 
-    // Creates a pairs matrix from a code. This is done by iterating through
-    // the code and incrementing the count of the pair of characters.
-    fn from_code(code: &Code) -> Self {
-        let mut num_pairs = Self::new();
-        for window in code.windows(2) {
-            let &[start_ch, end_ch] = window else {
-                panic!()
-            };
-            num_pairs[(start_ch, end_ch)] += 1;
-        }
-        num_pairs
-    }
-
-    fn char_to_index(ch: char) -> usize {
-        match ch {
-            'A' => 0,
-            '0' => 1,
-            '1' => 2,
-            '2' => 3,
-            '3' => 4,
-            '4' => 5,
-            '5' => 6,
-            '6' => 7,
-            '7' => 8,
-            '8' => 9,
-            '9' => 10,
-            '^' => 11,
-            '<' => 12,
-            'v' => 13,
-            '>' => 14,
-            _ => panic!("Invalid character!"),
-        }
-    }
-
-    fn index_to_char(index: usize) -> char {
-        match index {
-            0 => 'A',
-            1 => '0',
-            2 => '1',
-            3 => '2',
-            4 => '3',
-            5 => '4',
-            6 => '5',
-            7 => '6',
-            8 => '7',
-            9 => '8',
-            10 => '9',
-            11 => '^',
-            12 => '<',
-            13 => 'v',
-            14 => '>',
-            _ => panic!("Invalid index!"),
-        }
-    }
-
-    fn count_pairs(&self) -> u64 {
-        self.matrix.iter().map(|row| row.iter().sum::<u64>()).sum()
-    }
-}
-
-impl std::ops::Add for NumPairs {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        let mut result = Self::new();
-        for i in 0..15 {
-            for j in 0..15 {
-                result.matrix[i][j] = self.matrix[i][j] + other.matrix[i][j];
+    /// Given a set of moves, returns an option containing the expanded moves.
+    /// E.g. if moves = (('^', 2), ('<', 1)), then the output will be ['^','^','<', 'A']
+    fn expand_moves(moves: &Move) -> Code {
+        let mut path = vec![];
+        for (direction, count) in [moves.0, moves.1] {
+            if direction != '?' {
+                for _ in 0..count {
+                    path.push(direction);
+                }
             }
         }
-        result
+        path.push('A');
+
+        path
+    }
+
+    let paths = [moves1, moves2]
+        .iter()
+        .filter(|moves| is_move_valid(moves, &start, &end))
+        .map(|moves| expand_moves(moves))
+        .unique()
+        .collect();
+    paths
+}
+
+#[allow(dead_code)]
+fn print_code(code: &Code) {
+    for ch in code {
+        print!("{ch}");
     }
 }
 
-impl std::ops::Mul<u64> for NumPairs {
-    type Output = Self;
+static CACHE: OnceLock<Mutex<HashMap<(Vec2, Vec2, u64), u64>>> = OnceLock::new();
 
-    fn mul(self, other: u64) -> Self {
-        let mut result = Self::new();
-        for i in 0..15 {
-            for j in 0..15 {
-                result.matrix[i][j] = self.matrix[i][j] * other;
-            }
-        }
-        result
-    }
-}
-
-impl std::ops::Index<(char, char)> for NumPairs {
-    type Output = u64;
-
-    fn index(&self, index: (char, char)) -> &u64 {
-        &self.matrix[Self::char_to_index(index.0)][Self::char_to_index(index.1)]
-    }
-}
-
-impl std::ops::IndexMut<(char, char)> for NumPairs {
-    fn index_mut(&mut self, index: (char, char)) -> &mut u64 {
-        &mut self.matrix[Self::char_to_index(index.0)][Self::char_to_index(index.1)]
-    }
-}
-
-/// Takes in a NumPairs matrix and returns the next NumPairs matrix that would
-/// arise from inputting all the moves between each pair of characters.
-fn get_input_pairs(num_pairs: &NumPairs) -> NumPairs {
-    let mut new_num_pairs = NumPairs::new();
-    for i in 0..15 {
-        for j in 0..15 {
-            // For each pair of moves, we calculate the new pairs generated by
-            // the path between them, and add them on to our current running
-            // total.
-            let start_ch = NumPairs::index_to_char(i);
-            let end_ch = NumPairs::index_to_char(j);
-            let path = get_path(&char_to_location(start_ch), &char_to_location(end_ch));
-            let path_pairs = NumPairs::from_code(&path);
-            new_num_pairs = new_num_pairs + path_pairs * num_pairs[(start_ch, end_ch)];
+/// Gets the complexity of moving a robot arm from start to end.
+fn get_complexity_pair(start: &Vec2, end: &Vec2, num_keypads: u64) -> u64 {
+    let cache_key = (start.clone(), end.clone(), num_keypads);
+    {
+        let cache = CACHE
+            .get_or_init(|| Mutex::new(HashMap::new()))
+            .lock()
+            .unwrap();
+        if let Some(&cached_result) = cache.get(&cache_key) {
+            return cached_result;
         }
     }
-    new_num_pairs
+
+    let paths = get_possible_paths(start, end);
+    let complexity = paths
+        .into_iter()
+        .map(|path| get_complexity(&path, num_keypads - 1))
+        .min()
+        .expect("There should be at least one path");
+
+    {
+        let mut cache = CACHE
+            .get_or_init(|| Mutex::new(HashMap::new()))
+            .lock()
+            .unwrap();
+        cache.insert(cache_key, complexity);
+    }
+
+    complexity
 }
 
-fn get_code_complexity(code: &Code, num_robots: usize) -> u64 {
-    // Prefix the code with the character 'A' to represent the initial state.
+/// Gets the complexity of typing a given code, assuming that all robot arms start at A
+fn get_complexity(code: &Code, num_keypads: u64) -> u64 {
+    if num_keypads == 0 {
+        // We can just type the code directly.
+        return code.len() as u64;
+    }
+
+    // Break up longer codes into each individual segments.
+    // We add an 'A' in front to simulate the starting position of the robot arms.
     let mut code = code.clone();
     code.insert(0, 'A');
+    let sum = code
+        .windows(2)
+        .map(|window| {
+            let &[start, end] = window else {
+                panic!("Code should have exactly 2 elements");
+            };
+            let start = char_to_location(start);
+            let end = char_to_location(end);
+            get_complexity_pair(&start, &end, num_keypads)
+        })
+        .sum::<u64>();
 
-    let mut num_pairs = NumPairs::from_code(&code);
-    for _ in 0..num_robots + 1 {
-        num_pairs = get_input_pairs(&num_pairs);
-    }
-    num_pairs.count_pairs()
+    sum
 }
 
 fn get_code_numeric(code: &Code) -> u64 {
@@ -298,16 +183,18 @@ fn get_code_numeric(code: &Code) -> u64 {
 pub fn solve() {
     let codes = parse();
 
-    const NUM_ROBOTS: usize = 25;
+    // The number of _directional_ keypads on top of the original numeric keypad.
+    const NUM_KEYPADS: u64 = 26;
 
     let complexity_sum: u64 = codes
         .into_iter()
         .map(|code| {
-            let complexity = get_code_complexity(&code, NUM_ROBOTS);
+            let complexity = get_complexity(&code, NUM_KEYPADS);
             let code_numeric = get_code_numeric(&code);
-            println!("{complexity} {code_numeric}");
+            // println!("{complexity} {code_numeric}");
             complexity as u64 * code_numeric
         })
         .sum();
+
     println!("{complexity_sum}");
 }
