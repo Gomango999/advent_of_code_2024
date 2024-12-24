@@ -44,6 +44,7 @@ fn get_all_price_changes(prices: &Vec<u8>) -> Vec<i8> {
 
 /// Returns the number of bananas that you'd get from applying this sequence
 /// on this price
+#[allow(dead_code)]
 fn test_sequence(sequence: &[i8; SEQUENCE_LENGTH], prices: &Vec<u8>) -> u64 {
     let changes = get_all_price_changes(prices);
     changes
