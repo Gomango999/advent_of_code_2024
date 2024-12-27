@@ -13,7 +13,7 @@ impl Wire {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Operation {
     AND,
     OR,
@@ -39,7 +39,18 @@ impl Operation {
     }
 }
 
-#[derive(Debug, Clone)]
+impl std::fmt::Display for Operation {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let s = match self {
+            Operation::AND => "AND",
+            Operation::OR => "OR",
+            Operation::XOR => "XOR",
+        };
+        write!(f, "{}", s)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Gate {
     pub input1: Wire,
     pub input2: Wire,
@@ -87,20 +98,20 @@ impl Gate {
 pub struct Machine {
     pub wires: Vec<Wire>,
     pub gates: Vec<Gate>,
-    pub input_size: usize,
 }
 
 impl Machine {
+    /// The number of bits in the x and y register. z will have NUM_BITS+1 bits.
+    pub const NUM_BITS: u64 = 45;
+
     pub fn new() -> Self {
         Self {
             wires: Vec::new(),
             gates: Vec::new(),
-            input_size: 0,
         }
     }
     pub fn add_input(&mut self, wire: Wire) {
         self.wires.push(wire);
-        self.input_size = self.wires.len() / 2;
     }
     pub fn add_gate(&mut self, gate: Gate) {
         self.gates.push(gate);
@@ -114,7 +125,7 @@ impl Machine {
 
     fn _set_input(&mut self, name_prefix: char, value: u64) {
         let mut mask = 1;
-        for i in 0..self.input_size {
+        for i in 0..Self::NUM_BITS {
             let bit = (value & mask) >> i;
             let name = format!("{}{:02}", name_prefix, i);
             let wire = Wire::new(name, Some(bit));

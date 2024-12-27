@@ -1,7 +1,7 @@
-use super::parser::*;
+use super::parser;
 
 pub fn solve() {
-    let mut machine = parse();
+    let mut machine = parser::parse();
 
     let output = machine.run();
 

@@ -1,4 +1,4 @@
-use super::machine::*;
+use super::machine::{Gate, Machine, Operation, Wire};
 use std::fs::File;
 use std::io::{self, BufRead};
 
