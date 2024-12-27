@@ -56,7 +56,6 @@ fn main() {
         Config { day: 24, part: 'a' } => solutions::p24::a::solve(),
         Config { day: 24, part: 'b' } => solutions::p24::b::solve(),
         Config { day: 25, part: 'a' } => solutions::p25::a::solve(),
-        Config { day: 25, part: 'b' } => solutions::p25::b::solve(),
         _ => {
             eprintln!("Not a valid day!");
             std::process::exit(1)
